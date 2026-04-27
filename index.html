@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ghostgenja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1a1a1a;
+    --text: #e8e4d9;
+    --muted: #6b6860;
+    --accent: #c8b89a;
+    --accent2: #4a9e78;
+    --border: #2a2a2a;
+    --font-mono: 'JetBrains Mono', 'Courier Prime', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .scanline {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* HEADER */
+  header {
+    padding: 5rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prompt-line {
+    color: var(--accent2);
+    font-size: 12px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .prompt-line::before {
+    content: '>';
+    color: var(--accent2);
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 9px;
+    height: 15px;
+    background: var(--accent2);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  h1 {
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .tagline {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 480px;
+    line-height: 1.6;
+  }
+
+  .tagline strong {
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  /* NAV */
+  nav {
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 2rem;
+  }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--text); }
+
+  /* SECTION */
+  section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* PROJECT CARDS */
+  .projects {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+
+  .project {
+    background: var(--bg);
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .project:hover {
+    background: var(--bg3);
+  }
+
+  .project-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .project-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .project-desc {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.6;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 0.75rem;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+  }
+
+  .project-status {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .status-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .status-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .dl-link {
+    font-size: 11px;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .dl-link:hover { border-color: var(--accent); }
+
+  /* ABOUT */
+  .about-text {
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.9;
+    font-size: 13px;
+  }
+
+  .about-text p + p { margin-top: 1rem; }
+
+  .about-text a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .about-text a:hover { border-color: var(--accent); }
+
+  /* STACK */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 0;
+  }
+
+  .stack-item {
+    background: var(--bg);
+    padding: 1rem;
+    font-size: 12px;
+    color: var(--muted);
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .stack-item:hover {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  .stack-item span {
+    display: block;
+    font-size: 10px;
+    color: var(--border);
+    margin-top: 2px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-left {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-links a {
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--text); }
+
+  /* COMING SOON */
+  .coming {
+    opacity: 0.4;
+  }
+
+  .coming .status-dot::before {
+    background: var(--muted);
+    animation: none;
+  }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 2.5rem; }
+    .project { grid-template-columns: 1fr; }
+    .project-status { align-items: flex-start; }
+    footer { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<div class="container">
+
+  <header>
+    <div class="prompt-line">ghostgenja.github.io<span class="cursor"></span></div>
+    <h1>ghost<br>genja</h1>
+    <p class="tagline">I make tools <strong>I'd actually use.</strong><br>
+    Focus apps. Dice systems. Whatever's next.</p>
+  </header>
+
+  <nav>
+    <a href="#projects">projects</a>
+    <a href="#about">about</a>
+    <a href="#stack">stack</a>
+    <a href="https://ko-fi.com/ghostgenja">ko-fi</a>
+  </nav>
+
+  <section id="projects">
+    <div class="section-label">projects</div>
+
+    <div class="projects">
+
+      <div class="project">
+        <div class="project-meta">
+          <div class="project-name">Voidwrite</div>
+          <div class="project-desc">
+            A distraction-free writing environment built for focus. Typewriter sounds, custom typography controls, export support, and a dark void to disappear into.
+          </div>
+          <div class="project-tags">
+            <span class="tag">electron</span>
+            <span class="tag">writing</span>
+            <span class="tag">focus</span>
+            <span class="tag">desktop</span>
+          </div>
+        </div>
+        <div class="project-status">
+          <div class="status-dot">live</div>
+          <a href="#" class="dl-link">download</a>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="project-meta">
+          <div class="project-name">RollOrDie</div>
+          <div class="project-desc">
+            A TTRPG dice system built for the table. Custom dice, probability display, condition tracking. Roll what you need, see what it means.
+          </div>
+          <div class="project-tags">
+            <span class="tag">bun</span>
+            <span class="tag">vite</span>
+            <span class="tag">ttrpg</span>
+            <span class="tag">browser</span>
+          </div>
+        </div>
+        <div class="project-status">
+          <div class="status-dot">live</div>
+          <a href="#" class="dl-link">open app</a>
+        </div>
+      </div>
+
+      <div class="project coming">
+        <div class="project-meta">
+          <div class="project-name">???</div>
+          <div class="project-desc">
+            Something else I needed. Building it now.
+          </div>
+          <div class="project-tags">
+            <span class="tag">coming soon</span>
+          </div>
+        </div>
+        <div class="project-status">
+          <div class="status-dot">wip</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="section-label">about</div>
+    <div class="about-text">
+      <p>I build small tools that solve specific problems — mostly problems I have myself. ADHD-brained, vibe-coding, figuring it out as I go.</p>
+      <p>Everything here is free. If something is useful to you, that's enough. If you want to <a href="https://ko-fi.com/ghostgenja">buy me a coffee</a> that's also good.</p>
+      <p>Based somewhere. Making things.</p>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="section-label">stack</div>
+    <div class="stack-grid">
+      <div class="stack-item">Electron<span>desktop apps</span></div>
+      <div class="stack-item">Bun<span>runtime</span></div>
+      <div class="stack-item">Vite<span>build</span></div>
+      <div class="stack-item">Claude Code<span>ai assist</span></div>
+      <div class="stack-item">JavaScript<span>language</span></div>
+      <div class="stack-item">Linux<span>CachyOS</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-left">ghostgenja — made with focus</div>
+    <div class="footer-links">
+      <a href="https://github.com/ghostgenja">github</a>
+      <a href="https://ko-fi.com/ghostgenja">ko-fi</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
